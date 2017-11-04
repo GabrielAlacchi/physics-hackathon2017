@@ -18,7 +18,7 @@ function Simulation(graph, numberOfCars, alpha, t0, lambda, capacityThreshold) {
 
 }
 
-Simulation.prototype.createCars() {
+Simulation.prototype.createCars = function() {
     // Create the cars
     for (var i = 0; i < numberOfCars; i++) {
         // Choose a random node to start at
@@ -31,9 +31,9 @@ Simulation.prototype.createCars() {
         var car = Car(startingNode);
         this.cars.push(car);
     }
-}
+};
 
-Simulation.prototype.tick() {
+Simulation.prototype.tick = function() {
 
     for each (var car in this.cars) {
         if (car.getState() === "choosing") {
@@ -57,7 +57,7 @@ Simulation.prototype.tick() {
 
     // tick
     t += 1;
-}
+};
 
 Simulation.prototype.edgeTimesteps = function(edge) {
     return this.t0 + Math.floor(this.alpha * edge.numberOfCars);
@@ -76,7 +76,7 @@ function sampleDistribution(distribution) {
     }
 }
 
-Simulation.prototype.chooseEdge(car) {
+Simulation.prototype.chooseEdge = function(car) {
 
     // Create the probability distribution over adjacent edges
     var node = car.location;
@@ -110,4 +110,4 @@ Simulation.prototype.chooseEdge(car) {
     var i = sampleDistribution(distribution);
 
     return adjacentEdges[i];
-}
+};

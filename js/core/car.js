@@ -12,10 +12,10 @@ function Car(startingNode) {
     this.elapsed = 0;
 }
 
-Car.prototype.getState() {
+Car.prototype.getState = function() {
     return this.state;
-}
+};
 
-Car.prototype.setState(state) {
+Car.prototype.setState = function(state) {
     this.state = state;
-}
+};
