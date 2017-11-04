@@ -36,14 +36,18 @@ Simulation.prototype.createCars() {
 Simulation.prototype.tick() {
 
     for each (var car in this.cars) {
-        if (this.car.getState() === "choosing") {
+        if (car.getState() === "choosing") {
+            if (car.locationEdge) {
+                car.locationEdge.numberOfCars -= 1;
+            }
+
             var edge = this.chooseEdge(car);
             edge.numberOfCars += 1;
             car.location = this.graph.otherNode(node, edge);
             car.locationEdge = edge;
             car.timesteps = edgeTimesteps(edge);
             car.state = "traveling";
-        } else if (this.car.state === "traveling") {
+        } else if (car.state === "traveling") {
             car.elapsed += 1;
             if (car.elapsed === car.timesteps) {
                 car.state = "choosing";
