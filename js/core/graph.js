@@ -1,7 +1,7 @@
 
 function Edge(node1, node2, weight) {
     if (!(this instanceof Edge)) {
-        return new Edge(node1, node2);
+        return new Edge(node1, node2, weight);
     }
 
     this.nodes = [node1, node2];
@@ -10,25 +10,41 @@ function Edge(node1, node2, weight) {
 }
 
 function Node(id) {
+    if (!(this instanceof Node)) {
+        return new Node(id);
+    }
+
     this.id = id;
 }
 
-function Graph() {
+function Graph(graphdata) {
     if (!(this instanceof Graph)) {
-        return new Graph();
+        return new Graph(graphdata);
     }
 
     this.nodes = [];
     this.edges = [];
     this.adjacencyList = {};
+
+    for (var i = 0; i < graphdata.nodes.length; i++) {
+        this.addNode(i);
+    }
+
+    for (var i = 0; i < graphdata.links.length; i++) {
+        var link = graphdata.links[i];
+        this.addEdge(link.source, link.target, link.weight);
+    }
+}
+
+Graph.prototype.edgeWeight = function(edge, node) {
+    var index = edge.nodes.indexOf(node);
+    if (index !== -1) {
+        return edge.weight[index];
+    }
 }
 
 Graph.prototype.otherNode = function(node, edge) {
-    if (edge.nodes[0] === node) {
-        return edge.nodes[1];
-    } else {
-        return edge.nodes[0];
-    }
+    return edge.nodes[1 - edge.nodes.indexOf(node)];
 };
 
 Graph.prototype.addNode = function(node) {
@@ -36,12 +52,14 @@ Graph.prototype.addNode = function(node) {
         node = Node(node);
     }
     this.nodes.push(node);
-    this.adjacencyList[node] = [];
+    this.adjacencyList[node.id] = [];
     return node;
 };
 
 Graph.prototype.getNode = function(id) {
-    for each (var node in this.nodes) {
+    for (var key in this.nodes) {
+        var node = this.nodes[key];
+
         if (node.id === id) {
             return node;
         }
@@ -51,7 +69,9 @@ Graph.prototype.getNode = function(id) {
 };
 
 Graph.prototype.findEquivalentEdge = function(node1, node2) {
-    for each (var edge in this.edges) {
+    for (var key in this.edges) {
+        var edge = this.edges[key];
+
         if (edge.nodes[0] === node1 && edge.nodes[1] === node2) {
             return edge;
         } else if (edge.nodes[1] === node1 && edge.nodes[0] === node2) {
@@ -65,7 +85,7 @@ Graph.prototype.adjacentEdges = function(node) {
         node = this.getNode(node);
     }
 
-    return this.adjacencyList[node];
+    return this.adjacencyList[node.id];
 };
 
 Graph.prototype.addEdge = function(node1, node2, weight) {
@@ -91,8 +111,8 @@ Graph.prototype.addEdge = function(node1, node2, weight) {
     var edge = Edge(node1, node2, weight);
     this.edges.push(edge);
 
-    this.adjacencyList[node1].push(edge);
-    this.adjacencyList[node2].push(edge);
+    this.adjacencyList[node1.id].push(edge);
+    this.adjacencyList[node2.id].push(edge);
 
     return edge;
 };

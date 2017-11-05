@@ -10,6 +10,7 @@ function Car(startingNode) {
     this.state = "choosing";
     this.timesteps = 0;
     this.elapsed = 0;
+    this.distanceSteps = 0;
 }
 
 Car.prototype.getState = function() {

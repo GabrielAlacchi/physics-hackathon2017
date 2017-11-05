@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="icon.png">
+        <!-- Place favicon.ico in the root directory -->
+        <style>
+
+        .node {
+            fill: black;
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+
+        .link {
+        }
+
+        </style>
+    </head>
+    <body>
+        <!--[if lte IE 9]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="https://d3js.org/d3-color.v1.min.js"></script>
+        <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>        
+        <script src="/js/core/car.js"></script>
+        <script src="/js/core/graph.js"></script>
+        <script src="/js/core/simulation.js"></script>
+        <script>
+
+        // Define the dimensions of the visualization. We're using
+        // a size that's convenient for displaying the graphic on
+        // http://jsDataV.is
+        
+        var numberOfCars = 1000,
+            alpha = 10 / numberOfCars,
+            t0 = 5,
+            lambda = 0,
+            capacityThreshold = 10,
+            beta = 1 / 200;
+
+        var width = 640,
+            height = 480;
+
+        d3.json('graphdata-vincent-uniform.json', function(graphdata) {
+          var graph = Graph(graphdata);
+
+          // Find the max x and y
+          maxes = graphdata.nodes.reduce(function(max, e) {
+            return { x: Math.max(e.x, max.x), y: Math.max(e.y, max.y) };
+          }, { x:0, y:0 });
+
+          var xScale = d3.scale.linear().domain([0, maxes.x]).range([10, width - 10]);
+          var yScale = d3.scale.linear().domain([0, maxes.y]).range([10, height - 10]);
+
+          for (var i = 0; i < graphdata.nodes.length; i++) {
+            graphdata.nodes[i].x = xScale(graphdata.nodes[i].x);
+            graphdata.nodes[i].y = yScale(graphdata.nodes[i].y);
+          }
+
+          function linkToCoords(link) {
+              var target = graphdata.nodes[link.target];
+              var source = graphdata.nodes[link.source];
+              return {
+                target: link.target,
+                source: link.source,
+                x1: source.x,
+                y1: source.y,
+                x2: target.x,
+                y2: target.y,
+                weight: Math.max(link.weight[0], link.weight[1]),
+                density: Math.floor(Math.random() * 1000)
+              };
+          }
+
+          graphdata.links = graphdata.links.map(linkToCoords);
+
+          // Here's were the code begins. We start off by creating an SVG
+          // container to hold the visualization. We only need to specify
+          // the dimensions for this container.
+
+          var svg = d3.select('body').append('svg')
+              .attr('width', width)
+              .attr('height', height);
+
+          var link = svg.selectAll('.link')
+              .data(graphdata.links)
+              .enter().append('line')
+              .attr('class', 'link')
+              .attr('x1', function(d) { return d.x1; })
+              .attr('y1', function(d) { return d.y1; })
+              .attr('x2', function(d) { return d.x2; })
+              .attr('y2', function(d) { return d.y2; })
+              .attr('stroke-width', function(d) { return 5 + Math.floor(15 * d.weight); })
+              .attr('stroke', 'rgb(255, 0, 0)')
+
+          // Now it's the nodes turn. Each node is drawn as a circle.
+
+          var node = svg.selectAll('.node')
+              .data(graphdata.nodes)
+              .enter()
+              .append('circle')
+              .attr('class', 'node')
+              .attr('r', 10)
+              .attr('cx', function(d) { return d.x; })
+              .attr('cy', function(d) { return d.y; });
+
+          var simulation = Simulation(graph, numberOfCars, alpha, t0, lambda, capacityThreshold, beta);
+
+          var carTraceData = [];
+          var lineFunction = d3.svg.line()
+            .x(function(d) { return d.x; })
+            .y(function(d) { return d.y; })
+            .interpolate('linear');
+
+          var line = svg.append('path')
+              .attr('d', lineFunction(carTraceData))
+              .attr("stroke", "green")
+              .attr("stroke-width", 5)
+              .attr("fill", "none");
+
+          var averageMax = 0;
+          var samples = 0;
+
+          setInterval(function() {
+            var car = simulation.cars[0];
+            var x1 = graphdata.nodes[car.location.id].x;
+            var y1 = graphdata.nodes[car.location.id].y;
+            
+            if (car.state === "choosing") {
+              if (carTraceData.length > 0) {
+                carTraceData.pop();
+              }
+
+              carTraceData.push({"x": x1, "y": y1});
+              carTraceData.push({"x": x1, "y": y1});
+            } else if (car.state === "traveling") {
+              var finalPosition = carTraceData.pop();
+              var targetPosition = graph.otherNode(car.location, car.locationEdge).id;
+              var targetX = graphdata.nodes[targetPosition].x;
+              var targetY = graphdata.nodes[targetPosition].y;
+
+              finalPosition.x = x1 + (targetX - x1) * car.elapsed / car.timesteps;
+              finalPosition.y = y1 + (targetY - y1) * car.elapsed / car.timesteps;
+              carTraceData.push(finalPosition);
+            } else if (car.state === "exit") {
+              carTraceData = []
+            }
+
+            line.attr('d', lineFunction(carTraceData));
+
+            simulation.tick();
+
+            var maxCars = simulation.graph.edges.reduce(function(max, e) {
+              return Math.max(max, e.numberOfCars);
+            }, 0);
+
+            averageMax = samples * averageMax + maxCars;
+
+            samples += 1;
+            averageMax /= samples;
+
+            link.attr('stroke', function(d, i) {
+              var cars = simulation.graph.edges[i].numberOfCars;
+              return d3.interpolateReds(cars / averageMax);
+            });
+
+          }, 100);
+        })
+
+        </script>
+        <!-- <script src="/js/core/car.js" type="text/javascript"></script>
+        <script src="/js/core/graph.js" type="text/javascript"></script>
+        <script src="/js/core/simulation.js" type="text/javascript"></script>
+
+        <script type="text/javascript">
+
+        </script> -->
+    </body>
+</html>
