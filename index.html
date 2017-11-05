@@ -12,9 +12,13 @@
         <style>
 
         .node {
-            fill: black;
             stroke: #fff;
             stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        .link {
+          cursor: pointer;
         }
 
         #timestep-slider .slider-selection {
@@ -88,9 +92,9 @@
             roadCapacity = 2000,
             alpha = 20 / (roadCapacity),
             t0 = 10,
-            lambda = 1,
+            lambda = 0.9,
             capacityThreshold = 10,
-            beta = 1 / 200;
+            beta = 1 / 250;
 
         var width = 640,
             height = 760;
@@ -101,7 +105,7 @@
           }
         });
 
-        d3.json('graphdata-vincent-uniform.json', function(graphdata) {
+        d3.json('graphdata-abtin-nonuniform.json', function(graphdata) {
           var graph = Graph(graphdata);
 
           alpha *= graphdata.links.length;
@@ -154,9 +158,26 @@
               .attr('y2', function(d) { return d.y2; })
               .attr('stroke-width', function(d) { return 5 + Math.floor(15 * d.weight); })
               .attr('stroke', 'rgb(255, 0, 0)')
+              .on('click', function(data, index) {
+                graph.edges[index].enabled = !graph.edges[index].enabled;
+              })
+
+
+          function democracy(booleans) {
+            trues = 0;
+            falses = 0;
+            for (var i = 0; i < booleans.length; i++) {
+              if (booleans[i]) {
+                trues += 1;
+              } else {
+                falses += 1;
+              }
+            }
+
+            return trues >= falses;
+          }
 
           // Now it's the nodes turn. Each node is drawn as a circle.
-
           var node = svg.selectAll('.node')
               .data(graphdata.nodes)
               .enter()
@@ -164,7 +185,25 @@
               .attr('class', 'node')
               .attr('r', 10)
               .attr('cx', function(d) { return d.x; })
-              .attr('cy', function(d) { return d.y; });
+              .attr('cy', function(d) { return d.y; })
+              .attr('fill', function(d, i) {
+                var node = graph.nodes[i];
+                var booleans = graph.adjacentEdges(node).map(function(e) { return e.enabled; });
+                var enabled = booleans.reduce(function(all, b) { return all && b; }, true);
+
+                return enabled ? '#000000' : '#b2b2b2';
+              })
+              .on('click', function(data, index) {
+                var node = graph.nodes[index];
+                // Find out if the majority are enabled or disabled
+                var adjacentEdges = graph.adjacentEdges(node);
+                var booleans = adjacentEdges.map(function(e) { return e.enabled; });
+                var enabled = democracy(booleans);
+
+                for (var i = 0; i < adjacentEdges.length; i++) {
+                  adjacentEdges[i].enabled = !enabled;
+                }
+              });
 
           var simulation = Simulation(graph, numberOfCars, alpha, t0, lambda, roadCapacity, beta);
 
@@ -211,6 +250,11 @@
             simulation.tick();
 
             link.attr('stroke', function(d, i) {
+              // Show disabled things in grey
+              if (!simulation.graph.edges[i].enabled) {
+                return '#b2b2b2';
+              }
+
               var cars = simulation.graph.edges[i].numberOfCars;
               var numEdges = simulation.graph.edges.length;
               var probability =
@@ -218,6 +262,14 @@
 
               var intensity = Math.min(1, numEdges * cars / (2.3 * Math.pow(probability, 1.5) * roadCapacity));
               return d3.interpolateReds(intensity);
+            });
+
+            node.attr('fill', function(d, i) {
+              var node = graph.nodes[i];
+              var booleans = graph.adjacentEdges(node).map(function(e) { return e.enabled; });
+              var disabled = booleans.reduce(function(all, b) { return all && !b; }, true);
+
+              return !disabled ? '#000000' : '#b2b2b2';
             });
 
             // Update all the metrics

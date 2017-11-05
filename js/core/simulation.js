@@ -34,6 +34,11 @@ function sampleDistribution(distribution) {
         cumulative += distribution[i];
     }
 
+    // Null distribution (might happen in some weird cases). Just sample uniformly instead.
+    if (cumulative == 0) {
+        return Math.floor(Math.random() * distribution.length);
+    }
+
 }
 
 Simulation.prototype.createSpawnDistribution = function() {
@@ -144,7 +149,7 @@ Simulation.prototype.chooseEdge = function(car) {
         if (!edge.enabled) {
             return 0;
         }
-        
+
         return edge.weight[edge.nodes.indexOf(node)];
     }
 
@@ -190,7 +195,11 @@ Simulation.prototype.chooseEdge = function(car) {
     });
 
     var norm = distribution.reduce(function(sum, e) { return sum + e; }, 0);
-    distribution = distribution.map(function(e) { return e / norm; });
+    if (norm === 0) {
+        distribution = distribution.map(function() { return 0; });
+    } else {
+        distribution = distribution.map(function(e) { return e / norm; });
+    }
     var i = sampleDistribution(distribution);
 
     return adjacentEdges[i];
