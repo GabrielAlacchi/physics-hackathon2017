@@ -6,7 +6,17 @@ function Edge(node1, node2, weight) {
 
     this.nodes = [node1, node2];
     this.numberOfCars = 0;
+    this.averageNumberOfCars = 0;
+    this.samples = 0;
     this.weight = weight;
+}
+
+Edge.prototype.updateNumberOfCars = function(number) {
+    this.averageNumberOfCars = this.averageNumberOfCars * this.samples;
+    this.averageNumberOfCars += number;
+    this.samples = number;
+    this.samples += 1;
+    this.averageNumberOfCars /= this.samples;
 }
 
 function Node(id) {

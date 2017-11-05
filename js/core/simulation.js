@@ -79,13 +79,13 @@ Simulation.prototype.tick = function() {
 
         if (car.getState() === "choosing") {
             if (car.locationEdge) {
-                car.locationEdge.numberOfCars -= 1;
+                car.locationEdge.updateNumberOfCars(car.locationEdge.numberOfCars - 1);
             } else {
                 car.distanceSteps += 1;
             }
 
             var edge = this.chooseEdge(car);
-            edge.numberOfCars += 1;
+            edge.updateNumberOfCars(ege.numberOfCars + 1);
             car.locationEdge = edge;
             car.elapsed = 0;
             car.timesteps = this.edgeTimesteps(edge);
@@ -109,7 +109,7 @@ Simulation.prototype.tick = function() {
             car.timesteps = 0;
             car.distanceSteps = 0;
             car.state = "choosing";
-            car.locationEdge.numberOfCars -= 1;
+            car.locationEdge.updateNumberOfCars(car.locationEdge.numberOfCars - 1);
             car.locationEdge = null;
 
             var node = sampleDistribution(this.spawnDistribution);

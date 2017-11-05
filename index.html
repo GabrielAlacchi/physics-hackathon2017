@@ -49,7 +49,7 @@
             beta = 1 / 200;
 
         var width = 640,
-            height = 480;
+            height = 800;
 
         d3.json('graphdata-vincent-uniform.json', function(graphdata) {
           var graph = Graph(graphdata);
@@ -128,9 +128,6 @@
               .attr("stroke-width", 5)
               .attr("fill", "none");
 
-          var averageMax = 0;
-          var samples = 0;
-
           setInterval(function() {
             var car = simulation.cars[0];
             var x1 = graphdata.nodes[car.location.id].x;
@@ -160,18 +157,14 @@
 
             simulation.tick();
 
-            var maxCars = simulation.graph.edges.reduce(function(max, e) {
-              return Math.max(max, e.numberOfCars);
-            }, 0);
-
-            averageMax = samples * averageMax + maxCars;
-
-            samples += 1;
-            averageMax /= samples;
-
             link.attr('stroke', function(d, i) {
               var cars = simulation.graph.edges[i].numberOfCars;
-              return d3.interpolateReds(cars / averageMax);
+              var numEdges = simulation.graph.edges.length;
+              var probability =
+                (simulation.graph.edges[i].weight[0] + simulation.graph.edges[i].weight[1]) / 2;
+
+              var intensity = Math.min(1, numEdges * cars / (2.3 * probability * numberOfCars));
+              return d3.interpolateReds(intensity);
             });
 
           }, 100);
