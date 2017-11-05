@@ -17,10 +17,26 @@
             stroke-width: 2px;
         }
 
-        .link {
+        #timestep-slider .slider-selection {
+          background: #BABABA;
+        }
+
+        .pause-button {
+          font-size: 1.5em;
+          cursor: pointer;
         }
 
         </style>
+        <!-- Latest bootstrap compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css">
+
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <!-- Latest bootstrap compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js"></script>
+
+        <link rel="stylesheet" href="/css/index.css">
     </head>
     <body>
         <!--[if lte IE 9]>
@@ -35,6 +51,33 @@
         <script src="/js/core/car.js"></script>
         <script src="/js/core/graph.js"></script>
         <script src="/js/core/simulation.js"></script>
+
+        <div id="simulation">
+          <div class="controls">
+            <div class="input-group">
+              <label class="input-group-label" for="number-of-cars">Number of Cars</label>
+              <input type="number" value="1000" id="number-of-cars">
+            </div>
+            <div class="input-group">
+              <label class="input-group-label" for="global-capacity">Global Road Capacity</label>
+              <input type="number" value="2000" id="global-capacity">
+            </div>
+            <div class="input-group">
+              <label class="input-group-label" for="timestep">Simulation Speed</label>
+              <input id="timestep" data-slider-id='timestepSlider' type="text" data-slider-min="5" data-slider-max="50" data-slider-step="1" data-slider-value="20"/>
+              <span class="pause-button">
+                <span id="pause" class="glyphicon glyphicon-pause"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">Timestep: <span id="timestamp">0</span></div>
+            <div class="metric">Max Cars on an Edge: <span id="max-cars-edge">0</span></div>
+            <div class="metric">Max Delay Time: <span id="max-delay-time">0 timesteps</div>
+          <div class="body">
+          </div>
+        </div>
         <script>
 
         // Define the dimensions of the visualization. We're using
@@ -42,17 +85,26 @@
         // http://jsDataV.is
         
         var numberOfCars = 1000,
-            alpha = 10 / numberOfCars,
-            t0 = 5,
-            lambda = 0,
+            roadCapacity = 2000,
+            alpha = 20 / (roadCapacity),
+            t0 = 10,
+            lambda = 1,
             capacityThreshold = 10,
             beta = 1 / 200;
 
         var width = 640,
-            height = 800;
+            height = 760;
+
+        var timestepSlider = new Slider('#timestep', {
+          formatter: function(value) {
+            return 'FPS: ' + value;
+          }
+        });
 
         d3.json('graphdata-vincent-uniform.json', function(graphdata) {
           var graph = Graph(graphdata);
+
+          alpha *= graphdata.links.length;
 
           // Find the max x and y
           maxes = graphdata.nodes.reduce(function(max, e) {
@@ -88,7 +140,7 @@
           // container to hold the visualization. We only need to specify
           // the dimensions for this container.
 
-          var svg = d3.select('body').append('svg')
+          var svg = d3.select('#simulation').select('.body').append('svg')
               .attr('width', width)
               .attr('height', height);
 
@@ -114,7 +166,7 @@
               .attr('cx', function(d) { return d.x; })
               .attr('cy', function(d) { return d.y; });
 
-          var simulation = Simulation(graph, numberOfCars, alpha, t0, lambda, capacityThreshold, beta);
+          var simulation = Simulation(graph, numberOfCars, alpha, t0, lambda, roadCapacity, beta);
 
           var carTraceData = [];
           var lineFunction = d3.svg.line()
@@ -128,7 +180,8 @@
               .attr("stroke-width", 5)
               .attr("fill", "none");
 
-          setInterval(function() {
+
+          function simulationStep() {
             var car = simulation.cars[0];
             var x1 = graphdata.nodes[car.location.id].x;
             var y1 = graphdata.nodes[car.location.id].y;
@@ -163,12 +216,81 @@
               var probability =
                 (simulation.graph.edges[i].weight[0] + simulation.graph.edges[i].weight[1]) / 2;
 
-              var intensity = Math.min(1, numEdges * cars / (2.3 * probability * numberOfCars));
+              var intensity = Math.min(1, numEdges * cars / (2.3 * Math.pow(probability, 1.5) * roadCapacity));
               return d3.interpolateReds(intensity);
             });
 
-          }, 100);
-        })
+            // Update all the metrics
+            document.getElementById('timestamp').innerText = simulation.t.toString();
+            document.getElementById('max-cars-edge').innerText = 
+              simulation.graph.edges.reduce(function(max, e) {
+                return Math.max(max, e.numberOfCars);
+              }, 0).toString();
+            document.getElementById('max-delay-time').innerText = 
+              simulation.graph.edges.reduce(function(max, e) {
+                return Math.max(max, simulation.edgeTimesteps(e) - t0);
+              }, 0).toString() + " timesteps";
+          }
+
+          document.getElementById('number-of-cars').onchange = function() {
+            var number = parseInt(document.getElementById('number-of-cars').value);
+            if (number < 1) {
+              document.getElementById('number-of-cars').value = 1;
+              return;
+            }
+            if (!isNaN(number) && number > 0) {
+              simulation.adjustNumberOfCars(number);
+            }
+          }
+
+          document.getElementById('global-capacity').onchange = function() {
+            var value = parseInt(document.getElementById('global-capacity').value);
+            if (value < 100) {
+              document.getElementById('global-capacity').value = 100;
+              value = 100;
+            }
+
+            roadCapacity = value;
+            alpha = 100 / roadCapacity;
+            simulation.alpha = alpha;
+            simulation.roadCapacity = roadCapacity;
+          }
+
+          var intervalId = null;
+          var paused = false;
+          var playbackSpeed = timestepSlider.getValue();
+
+          function resetInterval() {
+            playbackSpeed = timestepSlider.getValue();
+            
+            if (!paused) {
+              if (intervalId != null) {
+                clearInterval(intervalId);
+              }
+
+              intervalId = setInterval(simulationStep, Math.floor(1000 / playbackSpeed));
+            }
+   
+          }
+
+          document.getElementById('pause').onclick = function() {
+            if (!paused) {
+              paused = true;
+              clearInterval(intervalId);
+              intervalId = null;
+              document.getElementById('pause').classList.remove('glyphicon-pause');
+              document.getElementById('pause').classList.add('glyphicon-play');
+            } else {
+              paused = false;
+              resetInterval();
+              document.getElementById('pause').classList.remove('glyphicon-play');
+              document.getElementById('pause').classList.add('glyphicon-pause');
+            }
+          }
+
+          resetInterval();
+          timestepSlider.on('slide', resetInterval);
+        });
 
         </script>
         <!-- <script src="/js/core/car.js" type="text/javascript"></script>

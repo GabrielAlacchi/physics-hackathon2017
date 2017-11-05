@@ -9,6 +9,7 @@ function Edge(node1, node2, weight) {
     this.averageNumberOfCars = 0;
     this.samples = 0;
     this.weight = weight;
+    this.enabled = true;
 }
 
 Edge.prototype.updateNumberOfCars = function(number) {
@@ -17,6 +18,9 @@ Edge.prototype.updateNumberOfCars = function(number) {
     this.samples = number;
     this.samples += 1;
     this.averageNumberOfCars /= this.samples;
+
+    // Finally update the variable
+    this.numberOfCars = number;
 }
 
 function Node(id) {
@@ -56,6 +60,10 @@ Graph.prototype.edgeWeight = function(edge, node) {
 Graph.prototype.otherNode = function(node, edge) {
     return edge.nodes[1 - edge.nodes.indexOf(node)];
 };
+
+Graph.prototype.degree = function(node) {
+    return this.adjacentEdges(node).length;
+}
 
 Graph.prototype.addNode = function(node) {
     if (!(node instanceof Node)) {
