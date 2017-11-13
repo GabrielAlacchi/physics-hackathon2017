@@ -48,7 +48,7 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="https://d3js.org/d3.v3.min.js"></script>
         <script src="https://d3js.org/d3-color.v1.min.js"></script>
         <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
         <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>        
@@ -96,7 +96,7 @@
             capacityThreshold = 10,
             beta = 1 / 250;
 
-        var width = 640,
+        var width = 800,
             height = 760;
 
         var timestepSlider = new Slider('#timestep', {
@@ -105,7 +105,7 @@
           }
         });
 
-        d3.json('graphdata-abtin-nonuniform.json', function(graphdata) {
+        d3.json('graphdata-hansen.json', function(graphdata) {
           var graph = Graph(graphdata);
 
           alpha *= graphdata.links.length;

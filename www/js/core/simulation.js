@@ -71,9 +71,15 @@ Simulation.prototype.createCars = function() {
     var initialLength = this.cars.length;
     for (var i = 0; i < this.numberOfCars - initialLength; i++) {
         // Choose a random node to start at
-        var random = sampleDistribution(this.spawnDistribution);
+        enabled = false
+        while (!enabled) {
+            var random = sampleDistribution(this.spawnDistribution);
+            var startingNode = this.graph.nodes[random];
+            var adjacentEdges = this.graph.adjacentEdges(startingNode);
+            var allDisabled = adjacentEdges.reduce(function(all, e) { return all && !e.enabled; }, true);
+            enabled = !allDisabled;
+        }
 
-        var startingNode = this.graph.nodes[random];
         var car = Car(startingNode);
         this.cars.push(car);
     }
@@ -119,10 +125,17 @@ Simulation.prototype.tick = function() {
             car.locationEdge.updateNumberOfCars(car.locationEdge.numberOfCars - 1);
             car.locationEdge = null;
 
-            var node = sampleDistribution(this.spawnDistribution);
+            var enabled = false;
+            while (!enabled) {
+                var random = sampleDistribution(this.spawnDistribution);
+                var startingNode = this.graph.nodes[random];
+                var adjacentEdges = this.graph.adjacentEdges(startingNode);
+                var allDisabled = adjacentEdges.reduce(function(all, e) { return all && !e.enabled; }, true);
+                enabled = !allDisabled;
+            }
 
             var despawnId = car.location.id;
-            car.location = this.graph.nodes[node];
+            car.location = startingNode;
         }
     }
 
