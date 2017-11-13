@@ -1,0 +1,15 @@
+
+
+.controls {
+	padding: 2em 2em 0 2em;
+	font-size: 1em;
+}
+
+.metrics {
+	padding: 2em;
+	font-size: 1em;
+}
+
+.input-group-label {
+	padding-right: 1em;
+}

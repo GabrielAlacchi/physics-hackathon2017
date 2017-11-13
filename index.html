@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<title>Team Nerf Crossbow</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<style>
+body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+<body class="w3-light-grey">
+ 
+<!-- w3-content defines a container for fixed size centered content, 
+and is wrapped around the whole page content, except for the footer in this example -->
+<div class="w3-content" style="max-width:1400px">
+
+<!-- Header -->
+<header class="w3-container w3-center w3-padding-32"> 
+  <h1><b>McGill Physics Hackathon 2017</b></h1>
+</header>
+
+<!-- Grid -->
+<div class="w3-row">
+
+<div class="w3-col l8 s12">
+
+<!-- Blog entries -->
+<div class="w3-col l8 s12">
+
+  <!-- Blog entry -->
+  <div class="w3-card-4 w3-margin w3-white">
+    <div class="w3-container">
+      <h3><b>Try It Out!</b></h3>
+    </div>
+
+    <div class="w3-container">
+		
+      <div class="w3-row">
+      <a href="/simulation.html">Click here</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog entry -->
+  <div class="w3-card-4 w3-margin w3-white">
+	<img src="/images/images.jpg" style="width:100%" >
+    <div class="w3-container">
+      <h3><b>Traffic Grid Simulation</b></h3>
+
+    </div>
+
+    <div class="w3-container">
+		<p>Prior to arriving at the hackathon, Abtin, Gabe, Hansen and Vincent contemplated for days about what they were going to tackle for this year’s event.  The sleep deprived group of undergraduates fought, battled and cried over different ideas ranging from solving the Schrödinger equation for arbitrary potentials to modelling the gyroscopic dynamics of coupled fidget spinners. It wasn’t until a few hours after registration that this team of four McGill undergrads slowly converged to a project idea.  For this year’s physics hackathon, the group decided to take on the challenge of modelling basic traffic dynamics formed by a network of vertices and edges. <br><br>The motivation for this project was purely based on its HC (how cool) factor. Dimensional analysis showed that the HC factor of this project was three orders of magnitude greater than what was estimated for competing ideas. Historically, the HC factor has been observed to be inversely proportional to its applicability to the real world.  This hackathon project seeks to break this empirical law.
+		</p>
+      <div class="w3-row">
+
+
+      </div>
+    </div>
+  </div>
+
+  <div class="w3-card-4 w3-margin w3-white">
+	<script>
+
+		PUT SCRIPT HERE
+
+	</script>
+  </div>
+  
+
+  <div class="w3-card-4 w3-margin w3-white">
+  	<img src="/images/sample.jpg" style="width:100%" >
+    <div class="w3-container">
+      <h3><b>Methodology </b></h3>
+
+    </div>
+
+    <div class="w3-container">
+		<p>
+
+			The process and assumptions used to model the walkers will be presented in this section. <br><br>
+
+			Model and Notation:<br><br>
+
+			V = set of all vertices v_k<br>
+
+			E = set of all edges e_ij with direction from vertices v_i to v_j<br>
+
+			n_ij = number of walkers from vertex v_i to v_j along e_ij<br>
+
+			s_ij = speed of a car along edge e_ij<br>
+
+			A = adjacency matrix connecting vertices v_i to v_j.  A_ij = 1 if v_i and v_j connected and 0 otherwise.  Clearly A_ij is symmetric positive definite.<br><br>
+
+			Basic assumptions to the model:<br><br>
+
+			We model a walking grid as a set of vertices interconnected by edges.  Naturally, the paths are represented by edges and intersections by vertices.  The probability of a walker at vertex v_i to travel along e_ij to vertex v_j depends on the number of walkers travelling along e_ij.  Namely, P(e_ij) = f(n_ij).   The time step of a walker along edge e_ij is denoted as t_ij. t_ij is also a function of the number of walkers present on the edge e_ij.  That is, t_ij = n_(ij).  The goal is to find the time evolution of system of walkers populating these edges.  We seek to determine how the time steps varies over time under different probabilistic models. <br><br>
+
+		</p>
+    <div class="w3-row">
+
+
+    </div>
+    </div>
+	</div>
+	
+	
+	
+  <div class="w3-card-4 w3-margin w3-white">
+	<img src="/images/flow.jpg" style="width:100%" >
+    <div class="w3-container">
+      <h3><b>Example of Walker Decision-Making</b></h3>
+
+    </div>
+
+    <div class="w3-container">
+		<p>
+		
+			Each walker will have a position between the nodes at any point in time, also known as an edge. Once sufficient time steps have passed for the walker to have crossed the edge that it is on, it must decide which direction
+			to go in next. Each of the possible paths for the walker have a certain probability, and the decision made by the walker is governed from the probability of each path. Furthermore, the probability for the walker to take 
+			certain path also depends on the total number of walkers on the path. The more walkers currently on a path, the less likely that new walkers will take that path (emulating the tendency for people to avoid congested roads).
+			 The walker also has a chance to "despawn", and this chance increases with time to illustrate that drivers are reaching their destinations. When a walker reaches its destination, a new walker will "spawn" in to replace it.
+		
+		</p>
+    <div class="w3-row">
+
+
+    </div>
+    </div>
+	
+  </div>
+	
+  <div class="w3-card-4 w3-margin w3-white">
+    <div class="w3-container">
+      <h3><b>Further applications</b></h3>
+
+    </div>
+
+    <div class="w3-container">
+		<p>
+<p class="p1">Stochastic systems:</p>
+<ul class="ul1">
+<li class="li1">Our simulation can model a diverse set of time evolving probabilistic systems</li>
+<li class="li1">Namely, systems from which each constituent element changes state as a function of local state properties on a time evolving probabilistic basis. <span class="Apple-converted-space">&nbsp;</span></li>
+</ul>
+<p class="p1">How could we model other types of systems?</p>
+<ul class="ul1">
+<li class="li1">Penalty and reward systems</li>
+<ul class="ul1">
+<li class="li1">Reward/penalize congregation of cars by relating the probability of choosing a road and the number of cars on that road.</li>
+<li class="li1">Reward/penalize cars based on the number of turns the car has previously avoided</li>
+<li class="li1">Implement various types of car that other entities want to avoid or follow</li>
+</ul>
+<li>Introduction of time varying probabilities for each edge due to an external parameter</li>
+<ul class="ul1">
+<li class="li1">Vary probabilities of certain edges based weather conditions</li>
+<li class="li1">Add day and night cycles to the probabilities</li>
+</ul>
+</ul>
+<p class="p2">&nbsp;</p>
+<p class="p1">Compressible fluids in a network of channels</p>
+<ul class="ul1">
+<li class="li1">The density along each edge is analogous to pressure in channel</li>
+<li class="li1">The higher the pressure in a channel, the higher the tendency of the fluid to go through other channels</li>
+<li class="li1">If a channel is wider, it will have a higher &lsquo;capacity&rsquo; for flow</li>
+<li class="li1">If pressure is high, velocity is low and vice versa</li>
+</ul>
+<p class="p2">&nbsp;</p>
+<p class="p1">Grocery stores and lines/queues</p>
+<ul class="ul1">
+<li class="li1">When choosing which grocery store register to attend, one looks at:</li>
+<li class="li1">How many people are in a queue (density)</li>
+<li class="li1">How many items each person carries (speed)</li>
+<li class="li1">By taking these factors into account, one chooses the queue that will take the least time to finish</li>
+</ul>
+<p class="p2">&nbsp;</p>
+<p class="p1">Phase change of matter</p>
+<ul class="ul1">
+<li class="li1">Phase change depends on both local and global parameters</li>
+<li class="li1">Temperature is an external forcing term to the energy state of the edge</li>
+<li class="li1">Local phase change may occur but depending on size and energy of itself and the state of neighboring molecules can directly affect its propagation</li>
+</ul>
+<p class="p2">&nbsp;</p>
+<p class="p1">From a statistical standpoint:</p>
+<ul class="ul1">
+<li class="li1">Variance and disorder of the system&rsquo;s constituent states</li>
+<li class="li1">The correlation length of the system (i.e. how much a single element can affect its neighboring elements).<span class="Apple-converted-space">&nbsp;</span></li>
+<li class="li1">Quasi stable/periodic configurations which will make cars follow predictable paths in the long run</li>
+</ul>
+			
+		</p>
+    <div class="w3-row">
+
+
+    </div>
+    </div>
+	
+  </div>
+
+
+
+</div>
+
+<!-- Introduction menu -->
+<div class="w3-col l4">
+  <!-- About Card -->
+  <div class="w3-card w3-margin w3-margin-top">
+  <img src="/images/team.png" style="width:100%">
+    <div class="w3-container w3-white">
+		<h4><b>Our Team</b></h4>
+		<p> 
+			Four Students. <br>
+			One Goal. <br>
+			One Dream.<br>
+			We're in it to win it baby. 
+			
+		</p>
+    </div>
+  </div>
+  
+
+  
+<!-- END Introduction Menu -->
+</div>
+
+<!-- END GRID -->
+</div><br>
+
+<!-- END w3-content -->
+</div>
+
+
+</body>
+</html>
